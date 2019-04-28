@@ -1,22 +1,24 @@
 const express = require('express');
+const bodyParser = require('body-parser');
 const mongoose = require('mongoose');
-const router = require('./routes');
+const logger = require('morgan');
+const cors = require('cors');
+const routes = require('./routes');
+
+const PORT = process.env.PORT || 3001;
+
 const app = express();
-var logger = require('morgan');
-const port = process.env.PORT || 5000;
+app.use(cors());
 
-app.use(express.urlencoded({ extended: true }));
-app.use(express.json());
-app.use(router);
-
+app.use(bodyParser.urlencoded({ extended: false }));
+app.use(bodyParser.json());
 app.use(logger('dev'));
 
-if (process.env.NODE_ENV === 'production') {
-  app.use(express.static('/client/build'));
-}
+app.use(express.static('client/build'));
 
-// console.log that server is up and running
-app.listen(port, () => console.log(`Listening on port ${port}`));
+app.use(routes);
+
+mongoose.Promise = global.Promise;
 
 var MONGODB_URI =
   process.env.MONGODB_URI || 'mongodb://localhost/games-reloaded';
@@ -25,7 +27,11 @@ mongoose.connect(MONGODB_URI, {
   useNewUrlParser: true
 });
 
-// GET route to know server is connected
-app.get('/express_backend', (req, res) => {
-  res.json({ express: 'YOUR EXPRESS BACKEND IS CONNECTED TO REACT' });
-});
+// console.log that server is up and running
+app.listen(PORT, () => console.log(`Listening on port ${PORT}`));
+
+
+// // GET route to know server is connected
+// app.get('/express_backend', (req, res) => {
+//   res.json({ express: 'YOUR EXPRESS BACKEND IS CONNECTED TO REACT' });
+// });
